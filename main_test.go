@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"testing"
+	"time"
 )
 
 func TestParseFile(t *testing.T) {
@@ -49,6 +50,7 @@ func TestPlay(t *testing.T) {
 			bpm:      128,
 			Patterns: song1Patterns,
 			maxSteps: 8,
+			ticker:   time.NewTicker(time.Microsecond * 1),
 		}
 		ch := make(chan string)
 		done := make(chan struct{}, 0)
@@ -78,6 +80,7 @@ func TestPlay(t *testing.T) {
 			bpm:      128,
 			Patterns: song2Patterns,
 			maxSteps: 16,
+			ticker:   time.NewTicker(time.Microsecond * 1),
 		}
 		ch := make(chan string)
 		done := make(chan struct{}, 0)

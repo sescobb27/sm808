@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+	"time"
 )
 
 func trapExit(done chan<- struct{}) {
@@ -73,6 +74,8 @@ func parseFile(file io.Reader) *Song {
 		}
 		lineNumber++
 	}
+	interval := ((60 / float32(song.bpm)) * float32(song.maxSteps/2))
+	song.ticker = time.NewTicker(time.Second * time.Duration(interval))
 	return song
 }
 
@@ -90,6 +93,7 @@ type Song struct {
 	bpm      int
 	Patterns []*Pattern
 	maxSteps int
+	ticker   *time.Ticker
 }
 type Pattern struct {
 	Name    string
@@ -103,10 +107,12 @@ func (song *Song) Play(write chan<- string, done <-chan struct{}) {
 	for {
 		select {
 		case <-done:
+			song.ticker.Stop()
 			return
-		default:
+		case <-song.ticker.C:
 			for _, pattern := range song.Patterns {
-				if string(pattern.Pattern[iter%len(pattern.Pattern)]) == "1" {
+				patternLen := len(pattern.Pattern)
+				if string(pattern.Pattern[iter%patternLen]) == "1" {
 					output = append(output, pattern.Name)
 				}
 			}
