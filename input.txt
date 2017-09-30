@@ -1,0 +1,5 @@
+Animal Rights
+128
+Kick 10001000
+Snare 00001000
+HiHat 00100010
