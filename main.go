@@ -67,6 +67,9 @@ func parseFile(file io.Reader) *Song {
 			inputPattern := strings.Split(text, " ")
 			pattern := &Pattern{Name: inputPattern[0], Pattern: inputPattern[1]}
 			song.Patterns = append(song.Patterns, pattern)
+			if len(pattern.Pattern) > song.maxSteps {
+				song.maxSteps = len(pattern.Pattern)
+			}
 		}
 		lineNumber++
 	}
@@ -86,7 +89,7 @@ type Song struct {
 	Name     string
 	bpm      int
 	Patterns []*Pattern
-	steps    int
+	maxSteps int
 }
 type Pattern struct {
 	Name    string
@@ -94,18 +97,16 @@ type Pattern struct {
 }
 
 func (song *Song) Play(write chan<- string, done <-chan struct{}) {
-	// If all patterns have the same length then we just need to know first
-	// pattern's length
-	step := len(song.Patterns[0].Pattern)
 	iter := 0
-	output := make([]string, 0, step)
+	output := make([]string, 0, song.maxSteps)
+
 	for {
 		select {
 		case <-done:
 			return
 		default:
 			for _, pattern := range song.Patterns {
-				if string(pattern.Pattern[iter%step]) == "1" {
+				if string(pattern.Pattern[iter%len(pattern.Pattern)]) == "1" {
 					output = append(output, pattern.Name)
 				}
 			}
